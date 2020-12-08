@@ -1,0 +1,17 @@
+Config file is obviously not checked in with GIT
+To have your own config file:
+create a folder called "config"
+put config.yml inside it
+
+Entries in config.yml should be as follows:
+
+
+mysql:
+  host: MYSQL_HOST
+  user: YOUR_USERNAME
+  password: YOUR_PASSWORD
+
+sqs:
+  aws_access_key_id: YOU_ACCESS_KEY_ID
+  aws_secret_access_key: YOUR_SECRET_ACCESS_KEY
+  region_name: YOUR_REGION_NAME
