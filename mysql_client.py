@@ -6,6 +6,7 @@ import sys
 import json
 import yaml
 
+
 class CounterType(Enum):
     PUSH_COUNT=1
     PULL_COUNT=2
@@ -23,12 +24,14 @@ with open ('./config/config.yml') as f:
     dbHost = cfg['mysql']['host']
 
 
-ROW_ID = 0
+#Table details
 databaseName = "amazon-sqs"
 PUSH_COLUMN_INDEX = 1
 PULL_COLUMN_INDEX = 2
 EMPTY_COLUMN_INDEX = 3
+ROW_ID = 0 #the telemetries table contains a single row, its ID is 0
 
+#queries used
 selectQuery = ("select * from telemetries where id = %s")
 insertQuery = ("insert into telemetries (id, push_count, pull_count, empty_count, LUT) VALUES (%s,%s,%s,%s,%s)")  
 updatePushCountQuery = ("update telemetries SET push_count = push_count+1, LUT=%s where id = 0") 
@@ -36,14 +39,18 @@ updatePullCountQuery = ("update telemetries SET pull_count = pull_count+1, LUT=%
 updateEmptyCountQuery = ("update telemetries SET empty_count = empty_count+1, LUT=%s where id = 0")
 nullifyCountersQuery = ("update telemetries SET push_count = 0, pull_count = 0, empty_count = 0, LUT=%s where id = 0") 
 
-
+#Create database conenction
 def createDbConnection():
+    logger.debug(f"Connecting to database {databaseName} on host {dbHost}")
     db = mysql.connector.connect(
             host=dbHost, 
             user=dbUser, 
             password=dbPassword, 
-            database=databaseName
+            database=databaseName,
+            auth_plugin='mysql_native_password'
+            
     )
+    logger.debug("connection established")
 
     return db
 
@@ -64,9 +71,12 @@ def initDbIfNeeded():
         #printing the result  
 
         if  len(result) == 0:
+            logger.info("Telemetries table is empty. Inserting a row into it")
             cur.execute(insertQuery, (ROW_ID, 0,0,0,datetime.now()))  
             db.commit()
             logger.info(f"{cur.rowcount} record(s) affected")
+        else:
+            logger.info("Telemetris table is ok")
        
     except Exception as e:  
         db.rollback()  
@@ -76,7 +86,10 @@ def initDbIfNeeded():
 
 
 
-
+#Increment a counter of counterType (push, pull, empty_queue)
+#(As this method can be run concurrently, potentially we could have used a lock here,
+#But since we use a single update query, and the incremenetaion is done solely in database, no concurrency
+#issues are expected...)
 def incrementCounter(counterType):
     if counterType == CounterType.PUSH_COUNT:
         query = updatePushCountQuery
@@ -101,19 +114,20 @@ def incrementCounter(counterType):
     except Exception as e:  
         db.rollback()  
         logger.error(e)
-    
-    db.close()  
+
+    finally:
+        db.close()  
 
 
-
+#Increment push counter
 def incrementPushCount():
    incrementCounter(CounterType.PUSH_COUNT)
 
-
+#Increment pull counter
 def incrementPullCount():
     incrementCounter(CounterType.PULL_COUNT)
 
-
+#Increment empty counter
 def incrementEmptyCount():
     incrementCounter(CounterType.EMPTY_COUNT)
 
@@ -160,7 +174,8 @@ def getTelemetries():
     return jsonString
 
 
-
+###########################
+#Nullify all elements in the table (for TESTING purposes)
 def nullifyTelemetries():
 
     db = createDbConnection()
@@ -182,6 +197,7 @@ def nullifyTelemetries():
     
     db.close()  
 
+##############################
 
 
 

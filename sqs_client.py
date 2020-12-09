@@ -153,19 +153,3 @@ def delete_messages(queue, messages):
     else:
         return response
 
-
-#def pack_message(msg_path, msg_body, msg_line):
-#        return {
-#            'body': msg_body,
-#            'attributes': {}
-#                'path': {'StringValue': msg_path, 'DataType': 'String'},
-#                'line': {'StringValue': str(msg_line), 'DataType': 'String'}
-#            }
-#        }
-
-#def unpack_message(msg):
-#        return (msg.message_attributes['path']['StringValue'],
-#                msg.body,
-#                int(msg.message_attributes['line']['StringValue']))
-
-

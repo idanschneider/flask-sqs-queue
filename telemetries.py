@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 def increase_empty_queue():
-    print("increase_empty_queue")
+    logger.debug("increase_empty_queue")
     mysql_client.incrementEmptyCount()
 
 
