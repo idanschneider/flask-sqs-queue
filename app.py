@@ -103,3 +103,6 @@ def delete_telemetries():
 #Specifically, do NOT use: app.run(port=5000)
 app.run(host='0.0.0.0') 
 
+#We won't use SSL but testing with self signed certificate is as easy as specifying this:
+#app.run(host='0.0.0.0', ssl_context='adhoc') 
+

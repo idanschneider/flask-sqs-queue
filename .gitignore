@@ -3,3 +3,6 @@
 *.config
 *.pyo
 *.pyc
+*.html
+templates/index.html
+
