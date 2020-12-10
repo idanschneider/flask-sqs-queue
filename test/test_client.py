@@ -62,7 +62,9 @@ def pullMessages(messageCount):
        callPull()
 
 
-#After each such calls we expect the telemteries to rise by: push: +10, pull: +10, empty: +5
+#Theoretically, after each such calls we expect the telemteries to rise by: push: +10, pull: +10, empty: +5
+#However there may be cases when the same message is processed more than once (as we used a "Standard" SQS queue)
+#To make sure "exactly once" we need to change the queue to FIFO SQS
 pushMessages(10)
 pullMessages(15)
 callGetTelemetries()
