@@ -5,4 +5,5 @@
 *.pyc
 *.html
 templates/index.html
+**/templates
 
